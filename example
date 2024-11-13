@@ -1,0 +1,44 @@
+import pandas as pd
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.preprocessing import LabelEncoder
+
+np.random.seed(42)
+data_size = 1000
+
+data = pd.DataFrame({
+    'contract_length': np.random.randint(1, 36, data_size),  
+    'monthly_charges': np.round(np.random.normal(70, 30, data_size), 2),
+    'internet_service': np.random.choice(['DSL', 'Fiber optic', 'No'], data_size),
+    'tech_support': np.random.choice(['Yes', 'No'], data_size),  
+    'streaming_tv': np.random.choice(['Yes', 'No'], data_size), 
+    'streaming_movies': np.random.choice(['Yes', 'No'], data_size),  
+    'churn': np.random.choice([0, 1], data_size) 
+})
+
+print(data.head())
+
+encoder = LabelEncoder()
+data['internet_service'] = encoder.fit_transform(data['internet_service'])
+data['tech_support'] = encoder.fit_transform(data['tech_support'])
+data['streaming_tv'] = encoder.fit_transform(data['streaming_tv'])
+data['streaming_movies'] = encoder.fit_transform(data['streaming_movies'])
+
+X = data.drop(columns='churn')
+y = data['churn']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Точность модели: {accuracy:.2f}")
+
+print("\nОтчет классификации:")
+print(classification_report(y_test, y_pred))
